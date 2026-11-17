@@ -50,14 +50,13 @@
       <input id="servicio" type="text" maxlength="80" placeholder="Escribe el servicio">
     </label>
 
-   <label>Turno
-      <select id="Turno">
+    <label>Turno
+      <select id="turno">
         <option value="">Selecciona tu turno</option>
         <option>Normal</option>
         <option>Doblete</option>
       </select>
     </label>
-   
     <label>Puesto
       <select id="puesto">
         <option value="">Selecciona tu puesto</option>
@@ -105,6 +104,7 @@
     $('nombre').value = localStorage.getItem('chk_nombre') || '';
     $('servicio').value = localStorage.getItem('chk_servicio') || '';
     $('puesto').value = localStorage.getItem('chk_puesto') || '';
+    $('turno').value = localStorage.getItem('chk_turno') || '';
   } catch (e) {}
 
   /* ---- hora oficial del servidor ---- */
@@ -159,11 +159,11 @@
   function info(t) { $('estado').textContent = t; $('estado').className = ''; }
 
   function actualizar() {
-    var listo = camOK && pos && $('nombre').value.trim() && $('servicio').value.trim() && $('puesto').value && !enviando;
+    var listo = camOK && pos && $('nombre').value.trim() && $('servicio').value.trim() && $('turno').value && $('puesto').value && !enviando;
     $('btnIn').disabled = $('btnOut').disabled = !listo;
     if (enviando) return;
     if (camOK && pos) {
-      info(listo ? 'Listo. Mira a la cámara y presiona Ingreso o Salida.' : 'Escribe tu nombre, el servicio y selecciona tu puesto.');
+      info(listo ? 'Listo. Mira a la cámara y presiona Ingreso o Salida.' : 'Escribe tu nombre y el servicio, y selecciona tu turno y tu puesto.');
     }
   }
 
@@ -174,9 +174,10 @@
   $('nombre').addEventListener('input', actualizar);
   $('servicio').addEventListener('input', actualizar);
   $('puesto').addEventListener('change', actualizar);
+  $('turno').addEventListener('change', actualizar);
 
   /* ---- captura + sello en la foto ---- */
-  function capturar(tipo, nombre, servicio, puesto) {
+  function capturar(tipo, nombre, servicio, turno, puesto) {
     var w = Math.min(720, video.videoWidth), h = Math.round(w * video.videoHeight / video.videoWidth);
     canvas.width = w; canvas.height = h;
     var c = canvas.getContext('2d');
@@ -186,7 +187,7 @@
       tipo + '  ' + fechaHora(ahora()),
       'Nombre: ' + nombre,
       'Servicio: ' + servicio,
-      'Puesto: ' + puesto,
+      'Turno: ' + turno + '  ·  Puesto: ' + puesto,
       'Ubicación: ' + textoUbicacion()
     ];
     var tam = Math.max(14, Math.round(w / 30)), alto = Math.round(tam * 1.4), margen = Math.round(tam * 0.7);
@@ -208,14 +209,15 @@
 
   function registrar(tipo) {
     if (enviando || !camOK || !pos) return;
-    var nombre = $('nombre').value.trim(), servicio = $('servicio').value.trim(), puesto = $('puesto').value;
-    if (!nombre || !servicio || !puesto) return;
+    var nombre = $('nombre').value.trim(), servicio = $('servicio').value.trim(), turno = $('turno').value, puesto = $('puesto').value;
+    if (!nombre || !servicio || !turno || !puesto) return;
 
-    var foto = capturar(tipo, nombre, servicio, puesto);
+    var foto = capturar(tipo, nombre, servicio, turno, puesto);
     try {
       localStorage.setItem('chk_nombre', nombre);
       localStorage.setItem('chk_servicio', servicio);
       localStorage.setItem('chk_puesto', puesto);
+      localStorage.setItem('chk_turno', turno);
     } catch (e) {}
 
     enviando = true; actualizar();
@@ -224,7 +226,7 @@
     fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify({
-        tipo: tipo, nombre: nombre, servicio: servicio, puesto: puesto, foto: foto,
+        tipo: tipo, nombre: nombre, servicio: servicio, turno: turno, puesto: puesto, foto: foto,
         lat: pos.lat, lng: pos.lng, precision: pos.precision,
         dispositivo: navigator.userAgent
       })
