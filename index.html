@@ -226,7 +226,7 @@
         enviando = false;
         if (!r || !r.ok) {
           var m = r && r.error ? String(r.error) : '';
-          error(m.indexOf('Ya tienes') === 0 ? m : 'No se pudo guardar' + (m ? ': ' + m : '.') + ' Intenta de nuevo.');
+          error(m.indexOf('Ya se cuenta') === 0 ? m : 'No se pudo guardar' + (m ? ': ' + m : '.') + ' Intenta de nuevo.');
           actualizar();
           $('estado').className = 'error';
           return;
